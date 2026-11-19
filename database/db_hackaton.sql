@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-11-2026 a las 17:28:13
+-- Tiempo de generación: 19-11-2026 a las 17:52:23
 -- Versión del servidor: 10.11.16-MariaDB
 -- Versión de PHP: 8.5.12
 
@@ -36,6 +36,13 @@ CREATE TABLE `paradas` (
   `orden` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `paradas`
+--
+
+INSERT INTO `paradas` (`id`, `ruta_id`, `nombre`, `lat`, `lng`, `orden`) VALUES
+(1, 1, 'Catedral de Morelia', 19.7022000, -101.1926000, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -62,6 +69,13 @@ CREATE TABLE `rutas` (
   `nombre` varchar(100) NOT NULL,
   `color` varchar(7) NOT NULL DEFAULT '#1e88e5'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `rutas`
+--
+
+INSERT INTO `rutas` (`id`, `nombre`, `color`) VALUES
+(1, 'Ruta 1 - Centro', 'rojo');
 
 -- --------------------------------------------------------
 
@@ -117,7 +131,7 @@ ALTER TABLE `unidades`
 -- AUTO_INCREMENT de la tabla `paradas`
 --
 ALTER TABLE `paradas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `reportes`
@@ -129,7 +143,7 @@ ALTER TABLE `reportes`
 -- AUTO_INCREMENT de la tabla `rutas`
 --
 ALTER TABLE `rutas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `unidades`
