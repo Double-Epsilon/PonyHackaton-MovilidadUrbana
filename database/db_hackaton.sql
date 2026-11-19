@@ -41,11 +41,6 @@ CREATE TABLE `paradas` (
 --
 
 INSERT INTO `paradas` (`id`, `ruta_id`, `nombre`, `lat`, `lng`, `orden`) VALUES
-(4, 2, 'Madero Oriente - Parada 1', 19.7018000, -101.1900000, 1),
-(5, 2, 'Madero Oriente - Parada 2', 19.7015000, -101.1820000, 4),
-(6, 2, 'Madero Oriente - Parada 3', 19.7000000, -101.1740000, 7);
-
-INSERT INTO `paradas` (`id`, `ruta_id`, `nombre`, `lat`, `lng`, `orden`) VALUES
 (7, 1, 'Parada 1', 19.7176760, -101.1886300, 2),
 (8, 1, 'Parada 2', 19.7094880, -101.1894470, 6);
 
