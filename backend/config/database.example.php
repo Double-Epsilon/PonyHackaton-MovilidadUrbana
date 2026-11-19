@@ -2,7 +2,8 @@
 
 return [
     "host" => "localhost",
-    "database" => "hackaton_db",
+    "database" => "db_hackaton",
     "username" => "root",
-    "password" => ""
+    "password" => "",
+    "charset" => "utf8mb4"
 ];

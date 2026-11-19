@@ -1,17 +1,31 @@
 <?php
 
-$config = require __DIR__ . "/database.local.php";
+$config = require __DIR__ . '/database.local.php';
+
+$dsn = sprintf(
+    'mysql:host=%s;dbname=%s;charset=%s',
+    $config['host'],
+    $config['database'],
+    $config['charset']
+);
 
 try {
     $pdo = new PDO(
-        "mysql:host={$config['host']};dbname={$config['database']};charset=utf8mb4",
-        $config["username"],
-        $config["password"],
+        $dsn,
+        $config['username'],
+        $config['password'],
         [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
         ]
     );
+    return $pdo;
+
 } catch (PDOException $e) {
-    http_response_code(500);
-    exit("Error de conexion con la base de datos");
+    error_log('Error de conexion MySQL: ' . $e->getMessage());
+
+    throw new RuntimeException(
+        'No se pudo establecer la conexion con la base de datos.'
+    );
 }
