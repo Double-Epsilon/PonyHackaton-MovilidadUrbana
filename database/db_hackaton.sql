@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-11-2026 a las 20:42:05
+-- Tiempo de generación: 19-11-2026 a las 22:58:36
 -- Versión del servidor: 10.11.16-MariaDB
 -- Versión de PHP: 8.5.12
 
@@ -56,8 +56,8 @@ INSERT INTO `paradas` (`id`, `ruta_id`, `nombre`, `lat`, `lng`, `orden`) VALUES
 
 CREATE TABLE `reportes` (
   `id` int(11) NOT NULL,
-  `ruta_id` int(11) NOT NULL,
-  `tipo` enum('unidad_llena','unidad_pasando','incidencia_accesibilidad') NOT NULL,
+  `tipo` enum('unidad_llena','parada_no_recomendada') NOT NULL,
+  `unidad_id` int(11) DEFAULT NULL,
   `lat` decimal(10,7) NOT NULL,
   `lng` decimal(10,7) NOT NULL,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
@@ -67,7 +67,29 @@ CREATE TABLE `reportes` (
 -- Volcado de datos para la tabla `reportes`
 --
 
-INSERT INTO `reportes` (`id`, `ruta_id`, `tipo`, `lat`, `lng`, `creado_en`) VALUES
+INSERT INTO `reportes` (`id`, `tipo`, `unidad_id`, `lat`, `lng`, `creado_en`) VALUES
+(1, 'unidad_llena', 2, 19.7033333, -101.1897667, '2026-11-19 21:57:32');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reportes_respaldo`
+--
+
+CREATE TABLE `reportes_respaldo` (
+  `id` int(11) NOT NULL DEFAULT 0,
+  `ruta_id` int(11) NOT NULL,
+  `tipo` enum('unidad_llena','unidad_pasando','incidencia_accesibilidad') NOT NULL,
+  `lat` decimal(10,7) NOT NULL,
+  `lng` decimal(10,7) NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `reportes_respaldo`
+--
+
+INSERT INTO `reportes_respaldo` (`id`, `ruta_id`, `tipo`, `lat`, `lng`, `creado_en`) VALUES
 (1, 1, 'unidad_llena', 19.7021000, -101.1912667, '2026-11-19 19:20:42'),
 (2, 1, 'incidencia_accesibilidad', 19.7033333, -101.1897667, '2026-11-19 19:15:42'),
 (3, 2, 'unidad_pasando', 19.7016000, -101.1846667, '2026-11-19 19:21:42'),
@@ -134,18 +156,19 @@ CREATE TABLE `unidades` (
   `lat` decimal(10,7) DEFAULT NULL,
   `lng` decimal(10,7) DEFAULT NULL,
   `progreso` decimal(5,4) NOT NULL DEFAULT 0.0000,
-  `estado` enum('en_movimiento','detenida') NOT NULL DEFAULT 'en_movimiento'
+  `estado` enum('en_movimiento','detenida') NOT NULL DEFAULT 'en_movimiento',
+  `ocupacion` enum('normal','llena') NOT NULL DEFAULT 'normal'
 ) ;
 
 --
 -- Volcado de datos para la tabla `unidades`
 --
 
-INSERT INTO `unidades` (`id`, `ruta_id`, `codigo`, `lat`, `lng`, `progreso`, `estado`) VALUES
-(1, 1, 'R1-01', NULL, NULL, 0.1500, 'en_movimiento'),
-(2, 1, 'R1-02', NULL, NULL, 0.6000, 'en_movimiento'),
-(3, 2, 'R2-01', NULL, NULL, 0.2000, 'en_movimiento'),
-(4, 2, 'R2-02', NULL, NULL, 0.7000, 'detenida');
+INSERT INTO `unidades` (`id`, `ruta_id`, `codigo`, `lat`, `lng`, `progreso`, `estado`, `ocupacion`) VALUES
+(1, 1, 'R1-01', NULL, NULL, 0.1500, 'en_movimiento', 'normal'),
+(2, 1, 'R1-02', NULL, NULL, 0.6000, 'en_movimiento', 'llena'),
+(3, 2, 'R2-01', NULL, NULL, 0.2000, 'en_movimiento', 'normal'),
+(4, 2, 'R2-02', NULL, NULL, 0.7000, 'detenida', 'normal');
 
 --
 -- Índices para tablas volcadas
@@ -163,7 +186,7 @@ ALTER TABLE `paradas`
 --
 ALTER TABLE `reportes`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_reportes_ruta` (`ruta_id`);
+  ADD KEY `fk_reporte_unidad` (`unidad_id`);
 
 --
 -- Indices de la tabla `rutas`
@@ -200,7 +223,7 @@ ALTER TABLE `paradas`
 -- AUTO_INCREMENT de la tabla `reportes`
 --
 ALTER TABLE `reportes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `rutas`
@@ -234,7 +257,7 @@ ALTER TABLE `paradas`
 -- Filtros para la tabla `reportes`
 --
 ALTER TABLE `reportes`
-  ADD CONSTRAINT `fk_reportes_ruta` FOREIGN KEY (`ruta_id`) REFERENCES `rutas` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_reporte_unidad` FOREIGN KEY (`unidad_id`) REFERENCES `unidades` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `trazo_ruta`

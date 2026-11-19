@@ -1,6 +1,6 @@
 import { CENTRO_MORELIA } from "../utils/geo.js";
 
-const API_BASE = "http://localhost/ruta_segura/api";
+const API_BASE = "http://localhost/PonyHackaton-MovilidadUrbana/backend/api";
 
 function normalizarPunto(punto, index, prefix) {
     const lat = Number(punto.lat ?? punto.latitud);
