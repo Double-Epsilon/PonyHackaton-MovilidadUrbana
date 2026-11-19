@@ -1,6 +1,7 @@
 # React
 frontend/node_modules/
 frontend/dist/
+.vite/
 
 # PHP
 backend/config/database.local.PHP
