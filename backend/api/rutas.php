@@ -35,69 +35,133 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $pdo = require __DIR__ . '/../config/database.php';
 
-    $sql = "
+    // ==========================================
+    // 1. OBTENER LAS RUTAS
+    // ==========================================
+
+    $sqlRutas = "
         SELECT
-            r.id AS ruta_id,
-            r.nombre AS ruta_nombre,
-            r.color AS ruta_color,
-
-            p.id AS parada_id,
-            p.nombre AS parada_nombre,
-            p.lat AS parada_lat,
-            p.lng AS parada_lng,
-            p.orden AS parada_orden
-        FROM rutas r
-
-        LEFT JOIN paradas p
-            ON r.id = p.ruta_id
-
-        ORDER BY r.id, p.orden
+            id,
+            nombre,
+            color
+        FROM rutas
+        ORDER BY id
     ";
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmtRutas = $pdo->prepare($sqlRutas);
+    $stmtRutas->execute();
 
-    $resultados = $stmt->fetchAll();
+    $resultadosRutas = $stmtRutas->fetchAll();
 
+    // ==========================================
+    // 2. OBTENER TODOS LOS PUNTOS DEL RECORRIDO
+    // ==========================================
 
-// ==========================================
-// ORGANIZAR RESULTADOS
-// ==========================================
+    $sqlPuntos = "
+        SELECT
+            puntos.ruta_id,
+            puntos.punto_id,
+            puntos.nombre,
+            puntos.lat,
+            puntos.lng,
+            puntos.orden,
+            puntos.tipo
+        FROM (
+            SELECT
+                ruta_id,
+                id AS punto_id,
+                nombre,
+                lat,
+                lng,
+                orden,
+                'parada' AS tipo
+            FROM paradas
+
+            UNION ALL
+
+            SELECT
+                ruta_id,
+                id AS punto_id,
+                NULL AS nombre,
+                lat,
+                lng,
+                orden,
+                'intermedio' AS tipo
+            FROM trazo_ruta
+        ) AS puntos
+
+        ORDER BY puntos.ruta_id, puntos.orden
+    ";
+
+    $stmtPuntos = $pdo->prepare($sqlPuntos);
+    $stmtPuntos->execute();
+
+    $resultadosPuntos = $stmtPuntos->fetchAll();
+
+    // ==========================================
+    // 3. ORGANIZAR LAS RUTAS
+    // ==========================================
 
     $rutas = [];
 
-    foreach ($resultados as $fila) {
+    // Crear las rutas y sus arreglos vacíos
+    foreach ($resultadosRutas as $fila) {
 
-        $rutaId = $fila['ruta_id'];
+        $rutaId = (int) $fila['id'];
 
-        // Crear la ruta si todavía no existe
+        $rutas[$rutaId] = [
+            'id' => $rutaId,
+            'nombre' => $fila['nombre'],
+            'color' => $fila['color'],
+            'paradas' => [],
+            'trazo' => []
+        ];
+    }
+
+    // ==========================================
+    // 4. AGREGAR LOS PUNTOS A CADA RUTA
+    // ==========================================
+
+    foreach ($resultadosPuntos as $fila) {
+
+        $rutaId = (int) $fila['ruta_id'];
+
+        // Comprobar que la ruta exista
         if (!isset($rutas[$rutaId])) {
-
-            $rutas[$rutaId] = [
-                'id' => (int) $rutaId,
-                'nombre' => $fila['ruta_nombre'],
-                'color' => $fila['ruta_color'],
-                'paradas' => []
-            ];
+            continue;
         }
 
-        // Agregar parada si existe
-        if ($fila['parada_id'] !== null) {
+        $punto = [
+            'id' => (int) $fila['punto_id'],
+            'lat' => (float) $fila['lat'],
+            'lng' => (float) $fila['lng'],
+            'orden' => (int) $fila['orden'],
+            'tipo' => $fila['tipo']
+        ];
 
+        // Si es una parada real, agregar su nombre
+        if ($fila['tipo'] === 'parada') {
+
+            $punto['nombre'] = $fila['nombre'];
+
+            // Guardar en el arreglo de paradas visibles
             $rutas[$rutaId]['paradas'][] = [
-                'id' => (int) $fila['parada_id'],
-                'nombre' => $fila['parada_nombre'],
-                'lat' => (float) $fila['parada_lat'],
-                'lng' => (float) $fila['parada_lng'],
-                'orden' => (int) $fila['parada_orden']
+                'id' => $punto['id'],
+                'nombre' => $punto['nombre'],
+                'lat' => $punto['lat'],
+                'lng' => $punto['lng'],
+                'orden' => $punto['orden']
             ];
         }
+
+        // Todos los puntos forman parte del trazo
+        $rutas[$rutaId]['trazo'][] = $punto;
     }
 
 
-// ==========================================
-// RESPUESTA JSON
-// ==========================================
+    // ==========================================
+    // 5. RESPUESTA JSON
+    // ==========================================
 
     echo json_encode([
         'success' => true,
